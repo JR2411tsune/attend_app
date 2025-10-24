@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
   get "home/index"
+  get "home/task1_7"
+  get "home/task2_4"
+
   get "sessions/new"
   get "sessions/create"
   get "sessions/destroy"
