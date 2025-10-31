@@ -8,3 +8,33 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.notice {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 3rem;
+  width: 90%;
+  background: linear-gradient(to bottom, #cae5cd, #3eb370);
+  border: 2px solid #2a854f;
+  color: #000;
+  font-weight: 500;
+  margin: auto 20px;
+  padding-left: 1rem;
+  border-radius: 5px;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 3rem;
+  width: 90%;
+  background: linear-gradient(to bottom, #ffd5d5, #ff2b2b);
+  border: 2px solid #d50000;
+  color: #000;
+  font-weight: 500;
+  margin: auto 20px;
+  padding-left: 1rem;
+  border-radius: 5px;
+}

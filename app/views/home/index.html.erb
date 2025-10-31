@@ -1,2 +1,17 @@
-<h1>Home#index</h1>
-<p>Find me in app/views/home/index.html.erb</p>
+<% if notice %>
+  <p class="notice"><%= notice %></p>
+<% end %>
+<% if flash[:alert] %>
+  <p class="alert"><%= alert %></p>
+<% end %>
+<p class="welcome_message">こんにちは、<%= current_user.name %>さん</p>
+<div class="lessons_container">
+  <% if current_user.role == "administrator" %>
+    <p class="current_student">[生徒名]の出席情報</p>
+  <% end %>
+  <%= render partial: lessons_table, locals: { lessons: @lessons } %>
+</div>
+<% if logged_in? %>
+  <p>あなたは、<%= current_user.role %>です。</p>
+<% end %>
+<%= button_to "ログアウト", logout_path, method: :delete %>
