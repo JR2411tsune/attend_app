@@ -1,6 +1,35 @@
-<table class="lessons_table" border="1">
+<table id="lessons_table">
   <thead>
+    <tr>
+      <th class="first_column"></th>
+      <% @week_days.each do |day| %>
+        <th><%= day.strftime("%m/%d") %><br>(<%= @days[day.wday] %>)</th>
+      <% end %>
+    </tr>
   </thead>
   <tbody>
+    <% 4.times do |period| %>
+      <tr>
+        <th class="first_column period_column"><%= period + 1 %>コマ</th>
+        <% @week_days.each do |day| %>
+          <% lesson = Lesson.find { |l| l.period_number == period + 1 && l.date == day } %>
+          <td class="lesson_cell">
+            <% if lesson %>
+              <%= lesson.subject %><br>
+              <% case lesson.is_attendance %>
+              <% when 0 %>
+                -
+              <% when 1 %>
+                〇
+              <% when 2 %>
+                ×
+              <% end %>
+            <% else %>
+              -
+            <% end %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
   </tbody>
 </table>

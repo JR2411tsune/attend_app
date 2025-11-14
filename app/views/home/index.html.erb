@@ -1,3 +1,5 @@
+<%= stylesheet_link_tag "home", media: "all" %>
+
 <% if notice %>
   <p class="notice"><%= notice %></p>
 <% end %>
@@ -9,7 +11,7 @@
   <% if current_user.role == "administrator" %>
     <p class="current_student">[生徒名]の出席情報</p>
   <% end %>
-  <%= render partial: lessons_table, locals: { lessons: @lessons } %>
+  <%= render partial: "lessons_table", locals: { lessons: @lessons } %>
 </div>
 <% if logged_in? %>
   <p>あなたは、<%= current_user.role %>です。</p>

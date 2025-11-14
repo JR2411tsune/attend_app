@@ -1,0 +1,18 @@
+#lessons_table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+#lessons_table th,
+#lessons_table td {
+  box-sizing: border-box;
+  width: 100px;
+  height: 100px;
+  padding: 5px;
+  text-align: center;
+}
+
+#lessons_table .first_column {
+  width: 150px;
+  font-size: 32px;
+}
