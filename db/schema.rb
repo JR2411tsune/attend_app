@@ -10,6 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema[7.2].define(version: 2025_10_24_024952) do
   create_table "attendances_tests", force: :cascade do |t|
     t.integer "user_id"
@@ -18,6 +19,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_24_024952) do
     t.datetime "updated_at", null: false
   end
 
+=======
+ActiveRecord::Schema[7.2].define(version: 2025_10_24_014911) do
+>>>>>>> 93054bff29c5849eb0afe83cbc0e21dd269aa9a7
   create_table "lessons", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "subject"
@@ -44,6 +48,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_24_024952) do
     t.integer "absence_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "student_no"
   end
 
   add_foreign_key "lessons", "users"
