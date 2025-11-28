@@ -38,3 +38,332 @@
   padding-left: 1rem;
   border-radius: 5px;
 }
+
+/* header */
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: #0b5ed7;
+  color: #fff;
+  position: relative;
+}
+.title-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* hamburger */
+.hamburger-menu {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 34px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: inherit;
+}
+.hamburger-menu:focus { outline: 2px solid #fff; border-radius: 4px; }
+.hamburger-menu .line {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: #fff;
+  border-radius: 2px;
+}
+
+/* sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  opacity: 0;
+  pointer-events: none;
+  transition: background 0.2s ease, opacity 0.2s ease;
+  z-index: 900;
+}
+.sidebar-overlay.visible {
+  background: rgba(0,0,0,0.35);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* sidebar (enhanced) */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;                 /* 左端に固定しておく */
+  width: 320px;
+  height: 100%;
+  box-sizing: border-box;
+  background: #f7f7f7;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  transform: translateX(-100%);  /* 初期状態は見えない位置へ完全オフスクリーン */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  z-index: 1000;
+  padding: 12px;
+  padding-left: 30px;
+  box-shadow: none;        /* 開いているときのみ影をつける */
+  will-change: transform;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.sidebar.open {
+  transform: translateX(0);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+}
+
+/* sidebar header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sidebar-close {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 6px;
+  cursor: pointer;
+}
+.sidebar-close:focus { outline: 2px solid #0b5ed7; border-radius: 4px; }
+
+.current_user_container .current_user_status {
+  font-size: 0.95rem;
+}
+
+.current_user_container .current_user_name {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* sidebar separator */
+.sidebar-separator {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  margin: 8px 0 12px 0;
+}
+/* students list */
+.students-list ul { list-style: none; padding: 0; margin: 0; }
+.students-list li { margin-bottom: 6px; }
+.student-link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #222;
+}
+.student-link:hover { background: #eef6ff; }
+.student_no { font-weight: 600; width: 5rem; }
+.student_name { color: #333; }
+
+/* responsive: hide sidebar on wide screens and show inline if desired */
+@media (min-width: 1024px) {
+  .sidebar {
+    transform: none;
+    left: 0;
+    position: relative;
+    width: 260px;
+    height: auto;
+    box-shadow: none;
+  }
+  .sidebar-overlay { display: none; }
+  .hamburger-menu { display: none; }
+  body { margin-left: 260px; } /* コンテンツを右にずらす */
+}
+
+.lesson_cell { 
+  position: relative; 
+  padding: 6px; 
+  vertical-align: top; 
+  overflow: visible; 
+}
+
+.lesson-inner { 
+  position: relative; 
+  height:100%; 
+}
+
+.attendance-controls { 
+  display: none; 
+  position: absolute; 
+  top: 6px; 
+  right: 6px; 
+  gap:6px; 
+}
+
+.lesson_cell:hover .attendance-controls { 
+  display: flex; 
+}
+
+.attendance-controls button { 
+  padding: 4px 8px; 
+  font-size: 0.9rem; 
+  cursor: pointer; 
+}
+
+.absence-panel { 
+  display: none; 
+  position: absolute; 
+  right: 6px; 
+  bottom: 6px; 
+  width: 220px; 
+  background:#fff; 
+  border: 1px solid #ddd; 
+  padding: 8px; 
+  border-radius: 6px; 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08); 
+  transform-origin: right bottom; 
+  transition: transform .15s ease, opacity .15s ease; 
+  opacity: 0; 
+  transform: scale(.9); 
+  z-index: 20; 
+}
+
+.absence-panel.open { 
+  display: block; 
+  opacity: 1; 
+  transform: scale(1.0); 
+}
+
+.absence-reason { 
+  width: 100%; 
+  box-sizing: border-box; 
+  margin-bottom:6px; 
+}
+
+.absence-actions { 
+  display: flex; 
+  gap:8px; 
+  justify-content: flex-end; 
+}
+
+.att-present { 
+  color: green; 
+  font-weight: 700; 
+}
+
+.att-absent { 
+  color: red; 
+  font-weight:700; 
+  transform: scale(1); 
+  transition: transform .12s ease; 
+}
+
+.absent-btn:active ~ .absence-panel,
+.absence-panel.open .att-absent { 
+  transform: scale(1.08); 
+}
+
+/* lessons cell layout */
+.lesson-main { display:flex; flex-direction:column; justify-content:space-between; height:100%; box-sizing:border-box; padding:6px; }
+
+/* subject styling (上) */
+.lesson-subject { font-weight:700; font-size:1rem; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* attendance mark (下) */
+.lesson-attendance { display:inline-block; font-size:1.25rem; padding:2px 6px; border-radius:4px; cursor:default; }
+.att-present { color: #1a7f37; }
+.att-none { color: #666; }
+.att-absent { color: #c82333; cursor:pointer; }
+
+/* absence tooltip (hidden by default) */
+.absence-tooltip {
+  position: absolute;
+  right: 8px;
+  bottom: 28px;
+  min-width: 180px;
+  max-width: 320px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.12);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #222;
+  display: none;
+  z-index: 60;
+  white-space: pre-wrap;
+}
+
+/* 表示時 */
+.lesson-cell-tooltip-open .absence-tooltip { display: block; }
+
+/* tooltip 短い矢印（下向き） */
+.absence-tooltip::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 100%;
+  border-width: 6px;
+  border-style: solid;
+  border-color: #fff transparent transparent transparent;
+  filter: drop-shadow(0 -1px 0 rgba(0,0,0,0.04));
+}
+
+/* lesson cell / tooltip */
+.lesson_cell { position: relative; padding: 6px; vertical-align: top; }
+.lesson-inner { position: relative; height: 100%; display:flex; flex-direction:column; justify-content:space-between; }
+
+/* 出欠マーク位置調整 */
+.lesson-attendance { display:inline-block; font-size:1.2rem; padding:2px 6px; border-radius:4px; }
+.att-present { color:#1a7f37; }
+.att-none { color:#666; }
+.att-absent { color:#c82333; cursor:pointer; }
+
+/* absence tooltip 基本（絶対位置、セル外へ出せる） */
+.absence-tooltip {
+  position: absolute;
+  right: 8px;
+  bottom: calc(100% + 8px); /* デフォルトはセルの上に出す */
+  min-width: 180px;
+  max-width: 360px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.12);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #222;
+  display: none;
+  z-index: 9999; /* 高めにして重なりを防ぐ */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* open state */
+.lesson-cell-tooltip-open .absence-tooltip { display: block; }
+
+/* hide attendance controls for already-submitted lessons */
+.lesson_cell.attendance-locked .attendance-controls,
+.lesson_cell.attendance-locked .absence-panel {
+  display: none !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* visually indicate locked state (optional visual hint) */
+.lesson_cell.attendance-locked {
+  opacity: 0.95;
+}
+
+/* ensure tooltip can escape cell but not break layout */
+.lesson_cell { overflow: visible; }
+
+/* 小画面では tooltip を横幅に合わせて制限 */
+@media (max-width: 520px) {
+  .absence-tooltip { left: 8px; right: 8px; bottom: calc(100% + 6px); max-width: none; }
+}
+

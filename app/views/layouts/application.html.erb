@@ -22,7 +22,225 @@
     <%= javascript_importmap_tags %>
   </head>
 
+  <header>
+    <button class="hamburger-menu" aria-label="メニューを開く" aria-expanded="false" type="button">
+      <span class="line"></span>
+      <span class="line"></span>
+      <span class="line"></span>
+    </button>
+
+    <p class="title-text">出欠席管理アプリ</p>
+  </header>
+
+  <%= render 'layouts/sidebar' %>
+
   <body>
     <%= yield %>
   </body>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var btn = document.querySelector('.hamburger-menu');
+      var sidebar = document.querySelector('.sidebar');
+      var closeBtn = document.querySelector('.sidebar-close');
+      var overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      document.body.appendChild(overlay);
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+
+      if (btn && sidebar) {
+        btn.addEventListener('click', function() {
+          if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+        });
+      }
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      overlay.addEventListener('click', closeSidebar);
+
+      // 学生リンクの非同期読み込み（イベントデリゲーション）
+      document.addEventListener('click', function(e) {
+        var link = e.target.closest('.student-link');
+        if (!link) return;
+        e.preventDefault();
+        var url = link.dataset.url;
+        if (!url) return;
+        fetch(url, { headers: { 'Accept': 'text/html' } })
+          .then(function(response){ return response.text(); })
+          .then(function(html){
+            var lessonsContainer = document.querySelector('.lessons_container');
+            var target = lessonsContainer || document.getElementById('timetable-container');
+            if (target) target.innerHTML = html;
+            closeSidebar();
+          })
+          .catch(function(err){ console.error('failed to load timetable', err); });
+      });
+
+      // 週切替ナビ（前週/次週）
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.week-nav');
+        if (!btn) return;
+        var wrapper = document.getElementById('lessons_wrapper') || document.querySelector('.lessons_container > div');
+        if (!wrapper) return;
+        var start = wrapper.dataset.start; // "YYYY-MM-DD"
+        var studentId = wrapper.dataset.studentId || '';
+        var dir = parseInt(btn.dataset.direction, 10) || 0;
+        e.preventDefault();
+
+        // compute new start date (ISO YYYY-MM-DD)
+        var d = new Date(start);
+        d.setDate(d.getDate() + dir * 7);
+        var yyyy = d.getFullYear();
+        var mm = ('0' + (d.getMonth()+1)).slice(-2);
+        var dd = ('0' + d.getDate()).slice(-2);
+        var newStart = yyyy + '-' + mm + '-' + dd;
+
+        var url = '/home/week?start=' + encodeURIComponent(newStart);
+        if (studentId) url += '&student_id=' + encodeURIComponent(studentId);
+
+        fetch(url, { headers: { 'Accept': 'text/html' } })
+          .then(function(res){ return res.text(); })
+          .then(function(html){
+            var lessonsContainer = document.querySelector('.lessons_container');
+            var target = lessonsContainer || document.getElementById('timetable-container');
+            if (target) {
+              target.innerHTML = html;
+              // update data-start on the new wrapper (server should set data-start)
+            }
+          })
+          .catch(function(err){ console.error('failed to load week', err); });
+      });
+
+      function csrfToken() {
+        var m = document.querySelector('meta[name="csrf-token"]');
+        return m ? m.getAttribute('content') : '';
+      }
+
+      // 出席ボタン
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.present-btn');
+        if (!btn) return;
+        e.preventDefault();
+        var id = btn.dataset.lessonId;
+        if (!id) return;
+        fetch('/lessons/' + id + '/mark_attendance', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken(),
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({})
+        }).then(function(r){ return r.json(); })
+          .then(function(json){
+            if (json.ok) updateLessonCell(id, json.lesson);
+          }).catch(function(){ console.error('attendance update failed'); });
+      });
+
+      // 欠席ボタン（表示パネルを開く）
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.absent-btn');
+        if (!btn) return;
+        e.preventDefault();
+        var cell = btn.closest('.lesson_cell');
+        if (!cell) return;
+        var panel = cell.querySelector('.absence-panel');
+        if (panel) panel.classList.toggle('open');
+      });
+
+      // 欠席取消
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.absence-cancel');
+        if (!btn) return;
+        e.preventDefault();
+        var panel = btn.closest('.absence-panel');
+        if (panel) panel.classList.remove('open');
+      });
+
+      // 欠席確定
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.absence-confirm');
+        if (!btn) return;
+        e.preventDefault();
+        var id = btn.dataset.lessonId;
+        var panel = btn.closest('.absence-panel');
+        if (!id || !panel) return;
+        var reason = panel.querySelector('.absence-reason').value || '';
+        fetch('/lessons/' + id + '/mark_absence', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken(),
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ reason: reason })
+        }).then(function(r){ return r.json(); })
+          .then(function(json){
+            if (json.ok) {
+              updateLessonCell(id, json.lesson);
+              if (panel) panel.classList.remove('open');
+            } else {
+              alert('更新できませんでした');
+            }
+          }).catch(function(){ console.error('absence update failed'); });
+      });
+
+      function updateLessonCell(id, lesson) {
+        var cell = document.querySelector('.lesson_cell[data-lesson-id="' + id + '"]');
+        if (!cell) return;
+        // 出欠表示を更新（簡易）
+        var attSpan = cell.querySelector('.lesson-attendance');
+        if (attSpan) {
+          if (lesson.is_attendance == 1) attSpan.innerHTML = '<span class="att-present">〇</span>';
+          else if (lesson.is_attendance == 2) attSpan.innerHTML = '<span class="att-absent">×</span>';
+          else attSpan.innerHTML = '<span class="att-none">-</span>';
+        }
+        // 欠席理由は必要なら更新（省略）
+      }
+
+      // toggle absence tooltip when clicking the × mark
+      document.addEventListener('click', function(e) {
+        var target = e.target.closest('.att-absent');
+        if (!target) return;
+        e.preventDefault();
+        var cell = target.closest('.lesson_cell');
+        if (!cell) return;
+
+        // close other open tooltips
+        document.querySelectorAll('.lesson_cell.lesson-cell-tooltip-open').forEach(function(c){
+          if (c !== cell) c.classList.remove('lesson-cell-tooltip-open');
+        });
+
+        // toggle this cell
+        cell.classList.toggle('lesson-cell-tooltip-open');
+      });
+
+      // keyboard accessibility: Enter / Space toggles tooltip
+      document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var focused = document.activeElement;
+        if (focused && focused.classList.contains('att-absent')) {
+          focused.click();
+          e.preventDefault();
+        }
+      });
+
+      // click outside to close any open tooltip
+      document.addEventListener('click', function(e) {
+        // skip if click is on an att-absent (handled above) or inside tooltip
+        if (e.target.closest('.att-absent') || e.target.closest('.absence-tooltip')) return;
+        document.querySelectorAll('.lesson_cell.lesson-cell-tooltip-open').forEach(function(c){
+          c.classList.remove('lesson-cell-tooltip-open');
+        });
+      }, true);
+    });
+  </script>
 </html>
