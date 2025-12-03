@@ -18,56 +18,59 @@
           <th class="first_column period_column"><%= period + 1 %>コマ</th>
 
           <% @week_days.each do |day| %>
-            <% lesson = (defined?(lessons) ? lessons : @lessons).detect do |l|
-                 l.period_number == period + 1 && l.date == day
-               end %>
+            <% lesson = (defined?(lessons) ? lessons : @lessons).detect { |l| l.date == day && l.period_number == (period + 1) } %>
+            <% data_attrs = {} %>
+            <% if lesson %>
+              <% data_attrs['data-lesson-id'] = lesson.id %>
+              <% data_attrs['data-absence-reason'] = h(lesson.absence_reason) if lesson.absence_reason.present? %>
+            <% end %>
 
-            <td class="lesson_cell <%= 'attendance-locked' if lesson && lesson.is_attendance.to_i != 0 %>"
-                data-lesson-id="<%= lesson&.id %>"
-                data-is-attendance="<%= lesson&.is_attendance.to_i %>">
-              <div class="lesson-inner">
-
-                <% if lesson %>
-                  <div class="lesson-main" style="display:flex;flex-direction:column;justify-content:space-between;height:100%;">
-                    <!-- 上: 教科名 -->
-                    <div class="subject-top">
-                      <span class="lesson-subject"><%= lesson.subject %></span>
-                    </div>
-
-                    <!-- 下: 出欠マーク -->
-                    <div class="attendance-bottom" style="margin-top:8px;">
-                      <% case lesson.is_attendance %>
-                      <% when 1 %>
-                        <span class="lesson-attendance att-present" title="出席">〇</span>
-                      <% when 2 %>
-                        <span class="lesson-attendance att-absent" role="button" tabindex="0" data-absence-reason="<%= h(lesson.absence_reason.to_s) %>">×</span>
-                        <div class="absence-tooltip" aria-hidden="true"><%= h(lesson.absence_reason.to_s) %></div>
+            <td class="lesson_cell" <%= data_attrs.map { |k,v| "#{k}=\"#{v}\"" }.join(' ').html_safe %>>
+              <% if lesson %>
+                <div class="lesson-inner">
+                  <div class="lesson-main">
+                    <span class="lesson-subject"><%= lesson.subject %></span>
+                    <span class="lesson-attendance">
+                      <% if lesson.is_attendance == 1 %>
+                        <span class="att-present">〇</span>
+                      <% elsif lesson.is_attendance == 2 %>
+                        <span class="att-absent">×</span>
                       <% else %>
-                        <span class="lesson-attendance att-none">-</span>
+                        <span class="att-none">-</span>
                       <% end %>
+                    </span>
+                  </div>
+
+                  <% if current_user.admin? %>
+                    <div class="attendance-controls">
+                      <button type="button" class="edit-btn" aria-label="編集" data-lesson-id="<%= lesson.id %>">編集</button>
                     </div>
-                  </div>
+                  <% else %>
+                    <div class="attendance-controls">
+                      <button type="button" class="present-btn" data-lesson-id="<%= lesson.id %>">出席</button>
+                      <button type="button" class="absent-btn" data-lesson-id="<%= lesson.id %>">欠席</button>
 
-                  <!-- ホバーで表示するボタン群 -->
-                  <div class="attendance-controls" aria-hidden="true">
-                    <button class="present-btn" type="button" data-lesson-id="<%= lesson.id %>">出席</button>
-                    <button class="absent-btn" type="button" data-lesson-id="<%= lesson.id %>">欠席</button>
-                  </div>
+                      <div class="absence-panel" aria-hidden="true">
+                        <textarea class="absence-reason" placeholder="欠席理由（任意）"><%= lesson.absence_reason if lesson.absence_reason.present? %></textarea>
+                        <div class="absence-actions">
+                          <button type="button" class="absence-confirm" data-lesson-id="<%= lesson.id %>">確定</button>
+                          <button type="button" class="absence-cancel">キャンセル</button>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
 
-                  <!-- 欠席入力パネル（初期は非表示） -->
-                  <div class="absence-panel" aria-hidden="true">
-                    <textarea class="absence-reason" placeholder="欠席理由を記入してください" rows="3"></textarea>
+                  <div class="admin-edit-panel" aria-hidden="true">
+                    <textarea class="absence-reason" placeholder="欠席理由（欠席選択時のみ）"><%= lesson.absence_reason if lesson.absence_reason.present? %></textarea>
                     <div class="absence-actions">
-                      <button class="absence-cancel" type="button">取消</button>
-                      <button class="absence-confirm" type="button" data-lesson-id="<%= lesson.id %>">欠席確定</button>
+                      <button type="button" class="admin-set-btn" data-action="present" data-lesson-id="<%= lesson.id %>">出席にする</button>
+                      <button type="button" class="admin-set-btn" data-action="absent" data-lesson-id="<%= lesson.id %>">欠席にする</button>
+                      <button type="button" class="admin-set-btn" data-action="none" data-lesson-id="<%= lesson.id %>">無効にする</button>
+                      <button type="button" class="absence-cancel">閉じる</button>
                     </div>
                   </div>
-
-                <% else %>
-                  -
-                <% end %>
-
-              </div>
+                </div>
+              <% end %>
             </td>
           <% end %>
 
@@ -75,9 +78,4 @@
       <% end %>
     </tbody>
   </table>
-
-  <div class="lessons-nav" style="text-align: right; margin-top: 8px;">
-    <button class="week-nav prev-week" type="button" data-direction="-1" aria-label="前週へ">◀ 前週</button>
-    <button class="week-nav next-week" type="button" data-direction="1" aria-label="次週へ">次週 ▶</button>
-  </div>
 </div>

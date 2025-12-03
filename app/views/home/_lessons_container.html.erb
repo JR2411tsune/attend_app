@@ -4,4 +4,20 @@
   <% end %>
 
   <%= render partial: "home/lessons_table", locals: { lessons: lessons, student: student } %>
+
+  <%# 集計（テーブルが出力する lessons を参照） %>
+  <% rendered_lessons = defined?(lessons) && lessons ? lessons : (@lessons || []) %>
+  <% total_present = rendered_lessons.count { |l| l.is_attendance == 1 } %>
+  <% total_absent  = rendered_lessons.count { |l| l.is_attendance == 2 } %>
+
+  <div class="lessons-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; max-width:1100px; margin-left:auto; margin-right:auto; padding-left:12px; padding-right:12px;">
+    <div class="lessons-summary" aria-hidden="false">
+      <strong>合計</strong> 出席: <span class="total-present"><%= total_present %></span> /
+      欠席: <span class="total-absent"><%= total_absent %></span>
+    </div>
+    <div class="lessons-nav" style="text-align: right;">
+      <button class="week-nav prev-week" type="button" data-direction="-1" aria-label="前週へ">◀ 前週</button>
+      <button class="week-nav next-week" type="button" data-direction="1" aria-label="次週へ">次週 ▶</button>
+    </div>
+  </div>
 </div>

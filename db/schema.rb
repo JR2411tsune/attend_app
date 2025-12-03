@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_24_014911) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_03_033909) do
   create_table "lessons", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "subject"
@@ -32,6 +32,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_24_014911) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "student_no"
+    t.index ["student_no"], name: "index_users_on_student_no", unique: true
   end
 
   add_foreign_key "lessons", "users"

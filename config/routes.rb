@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     member do
       patch :mark_attendance
       patch :mark_absence
+      patch :mark_none
     end
   end
 

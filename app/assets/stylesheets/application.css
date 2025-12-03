@@ -172,16 +172,29 @@ header {
 /* responsive: hide sidebar on wide screens and show inline if desired */
 @media (min-width: 1024px) {
   .sidebar {
-    transform: none;
+    /* 広い画面でもオーバーレイ型にしてデフォルトは閉じた状態にする */
+    transform: translateX(-100%);
     left: 0;
-    position: relative;
-    width: 260px;
-    height: auto;
+    position: fixed;
+    width: 320px;
+    height: 100%;
     box-shadow: none;
+    z-index: 1000;
   }
-  .sidebar-overlay { display: none; }
-  .hamburger-menu { display: none; }
-  body { margin-left: 260px; } /* コンテンツを右にずらす */
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+  }
+
+  /* overlay は常に DOM にあるが visible クラスで表示制御する（既存の JS と整合） */
+  .sidebar-overlay { /* 既定の定義を使用するため特に変更不要 */ }
+
+  /* hamburger は常に表示（クリックで sidebar を開閉） */
+  .hamburger-menu { display: inline-flex; }
+
+  /* ページ全体の左余白を消して中央揃え等が崩れないようにする */
+  body { margin-left: 0; }
 }
 
 .lesson_cell { 
@@ -260,6 +273,13 @@ header {
   font-weight:700; 
   transform: scale(1); 
   transition: transform .12s ease; 
+}
+
+.edit-btn {
+  left: 50%;
+  top: 50%;
+  position: absolute;
+  transform: translateX(-50%, -50%);
 }
 
 .absent-btn:active ~ .absence-panel,
@@ -366,4 +386,32 @@ header {
 @media (max-width: 520px) {
   .absence-tooltip { left: 8px; right: 8px; bottom: calc(100% + 6px); max-width: none; }
 }
+
+/* admin edit panel: same behavior as absence-panel */
+.admin-edit-panel {
+  display: none;
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  width: 240px;
+  background:#fff;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform-origin: right bottom;
+  transition: transform .15s ease, opacity .15s ease;
+  opacity: 0;
+  transform: scale(.96);
+  z-index: 30;
+}
+
+.admin-edit-panel.open {
+  display: block;
+  opacity: 1;
+  transform: scale(1.0);
+}
+
+/* ensure textarea width inside panel */
+.admin-edit-panel .absence-reason { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
 

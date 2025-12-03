@@ -8,7 +8,11 @@ class ApplicationController < ActionController::Base
 
   def load_students
     return unless logged_in? && current_user&.admin?
-    @students = User.where(role: 'student').select(:id, :student_no, :name).distinct.order(:student_no)
+    # student_no ごとにまとめて、代表となる id を返す（重複行を潰す）
+    @students = User.where(role: 'student')
+                    .group(:student_no, :name)
+                    .select('MIN(id) AS id, student_no, name')
+                    .order(:student_no)
   end
 
   def current_user
