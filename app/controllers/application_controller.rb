@@ -7,8 +7,8 @@ class ApplicationController < ActionController::Base
   private
 
   def load_students
-    return unless logged_in? && current_user.admin?
-    @students = User.where(role: 'student').select(:student_no, :name).order(:student_no)
+    return unless logged_in? && current_user&.admin?
+    @students = User.where(role: 'student').select(:id, :student_no, :name).distinct.order(:student_no)
   end
 
   def current_user
@@ -20,9 +20,7 @@ class ApplicationController < ActionController::Base
   end
 
   def require_login
-    unless logged_in?
-      redirect_to login_path
-    end
+    redirect_to login_path unless logged_in?
   end
 
 end

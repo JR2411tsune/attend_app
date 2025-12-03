@@ -20,6 +20,7 @@
       <% if @students.present? %>
         <ul>
           <% @students.each do |student| %>
+            <% next unless student&.id.present? %>
             <li>
               <a href="#" class="student-link" data-url="<%= timetable_student_path(student) %>">
                 <span class="student_no"><%= student.student_no %></span>

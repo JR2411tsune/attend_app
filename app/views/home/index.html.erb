@@ -9,9 +9,9 @@
 <p class="welcome_message">こんにちは、<%= current_user.name %>さん</p>
 <div class="lessons_container">
   <% if current_user.role == "administrator" %>
-    <p class="current_student">[生徒名]の出席情報</p>
+    <p class="current_student"><%= @display_student ? "#{@display_student.name} の出席情報" : "[生徒未選択]" %></p>
   <% end %>
-  <%= render partial: "lessons_table", locals: { lessons: @lessons } %>
+  <%= render partial: "lessons_table", locals: { lessons: @lessons, student: @display_student } %>
 </div>
 <% if logged_in? %>
   <p>あなたは、<%= current_user.role %>です。</p>

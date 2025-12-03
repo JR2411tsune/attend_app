@@ -1,0 +1,7 @@
+<div class="lessons_container">
+  <% if current_user.role == "administrator" %>
+    <p class="current_student"><%= student ? "#{student.name} の出席情報" : "[生徒未選択]" %></p>
+  <% end %>
+
+  <%= render partial: "home/lessons_table", locals: { lessons: lessons, student: student } %>
+</div>
