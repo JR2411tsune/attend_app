@@ -1,19 +1,34 @@
 <div class="lessons_container">
   <% if current_user.role == "administrator" %>
-    <p class="current_student"><%= student ? "#{student.name} の出席情報" : "[生徒未選択]" %></p>
+    <p class="current_student" style="font-weight: bold;"><%= student ? "#{student.name} の出席情報" : "[生徒未選択]" %></p>
   <% end %>
 
   <%= render partial: "home/lessons_table", locals: { lessons: lessons, student: student } %>
 
-  <%# 集計（テーブルが出力する lessons を参照） %>
+  <%# 表示中の週の集計（既存） %>
   <% rendered_lessons = defined?(lessons) && lessons ? lessons : (@lessons || []) %>
   <% total_present = rendered_lessons.count { |l| l.is_attendance == 1 } %>
   <% total_absent  = rendered_lessons.count { |l| l.is_attendance == 2 } %>
 
+  <%# 対象ユーザーを決定（student がいればその生徒、なければ rendered_lessons の最初の lesson の user、それもなければ current_user） %>
+  <% target_user = student || (rendered_lessons.first&.user) || current_user %>
+
+  <% if target_user %>
+    <% total_present_all = target_user.lessons.where(is_attendance: 1).count %>
+    <% total_absent_all  = target_user.lessons.where(is_attendance: 2).count %>
+  <% else %>
+    <% total_present_all = 0 %>
+    <% total_absent_all  = 0 %>
+  <% end %>
+
   <div class="lessons-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; max-width:1100px; margin-left:auto; margin-right:auto; padding-left:12px; padding-right:12px;">
     <div class="lessons-summary" aria-hidden="false">
-      <strong>合計</strong> 出席: <span class="total-present"><%= total_present %></span> /
+      <strong>今週の合計</strong> 出席: <span class="total-present"><%= total_present %></span> /
       欠席: <span class="total-absent"><%= total_absent %></span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <strong>全期間合計</strong>
+      出席: <span class="total-present-all"><%= total_present_all %></span> /
+      欠席: <span class="total-absent-all"><%= total_absent_all %></span>
     </div>
     <div class="lessons-nav" style="text-align: right;">
       <button class="week-nav prev-week" type="button" data-direction="-1" aria-label="前週へ">◀ 前週</button>

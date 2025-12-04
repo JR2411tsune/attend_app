@@ -9,8 +9,3 @@
 <p class="welcome_message">こんにちは、<%= current_user.name %>さん</p>
 
 <%= render partial: "home/lessons_container", locals: { lessons: @lessons, student: @display_student } %>
-
-<% if logged_in? %>
-  <p>あなたは、<%= current_user.role %>です。</p>
-<% end %>
-<%= button_to "ログアウト", logout_path, method: :delete %>

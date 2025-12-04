@@ -23,19 +23,26 @@
   </head>
 
   <body>
-    <header>
-      <button class="hamburger-menu" aria-label="メニューを開く" aria-expanded="false" type="button">
-        <span class="line"></span>
-        <span class="line"></span>
-        <span class="line"></span>
-      </button>
-
-      <p class="title-text">出欠席管理アプリ</p>
+    <header class="app-header">
+      <div class="header-left">
+        <button class="hamburger-menu" aria-label="メニューを開く" aria-expanded="false" type="button">
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="line"></span>
+        </button>
+        <p class="title-text">出欠席管理アプリ</p>
+      </div>
+      <div class="header-right">
+        <% if logged_in? %>
+          <%= button_to "ログアウト", logout_path, method: :delete, class: "logout-btn" %>
+        <% end %>
+      </div>
     </header>
 
     <%= render 'layouts/sidebar' %>
-
-    <%= yield %>
+    <main class="page-main">
+      <%= yield %>
+    </main>
   </body>
 
   <script>
@@ -68,13 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
   if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
   overlay.addEventListener('click', closeSidebar);
 
-  // CSRF token
   function csrfToken() {
     var m = document.querySelector('meta[name="csrf-token"]');
     return m ? m.getAttribute('content') : '';
   }
 
-  // Utility: fetch JSON with CSRF, credentials and basic error handling
   function fetchJson(path, options) {
     options = options || {};
     options.credentials = options.credentials || 'same-origin';
@@ -84,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
       'Content-Type': 'application/json'
     }, options.headers || {});
     return fetch(path, options).then(function(res) {
-      // log status for debugging
       console.debug('fetchJson', path, res.status);
       if (!res.ok) {
         return res.text().then(function(txt) {
@@ -99,13 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Utility: fetch HTML (with credentials)
   function fetchHtml(path) {
     return fetch(path, { credentials: 'same-origin', headers: { 'Accept': 'text/html' } })
       .then(function(res){ if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); });
   }
 
-  // 学生リンクの非同期読み込み（時間割切替）
+  // 学生リンクの非同期読み込み（サイドバー内）
   document.addEventListener('click', function(e) {
     var link = e.target.closest('.student-link');
     if (!link) return;
@@ -117,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var lessonsContainer = document.querySelector('.lessons_container');
         var target = lessonsContainer || document.getElementById('timetable-container');
         if (lessonsContainer) {
-          // 既存の .lessons_container を丸ごと置換してネストを防止
           lessonsContainer.outerHTML = html;
         } else if (target) {
           target.innerHTML = html;
@@ -127,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(function(err){ console.error('failed to load timetable', err); alert('時間割の読み込みに失敗しました'); });
   });
 
-  // 週切替ナビ（前週/次週）
+  // 週切替ナビ
   document.addEventListener('click', function(e) {
     var wbtn = e.target.closest('.week-nav');
     if (!wbtn) return;
@@ -153,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var lessonsContainer = document.querySelector('.lessons_container');
         var target = lessonsContainer || document.getElementById('timetable-container');
         if (lessonsContainer) {
-          // 既存の .lessons_container を丸ごと置換してネストを防止
           lessonsContainer.outerHTML = html;
         } else if (target) {
           target.innerHTML = html;
@@ -162,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(function(err){ console.error('failed to load week', err); alert('週切替に失敗しました'); });
   });
 
-  // 出席ボタン（学生）
+  // 出席（学生）
   document.addEventListener('click', function(e) {
     var p = e.target.closest('.present-btn');
     if (!p) return;
@@ -171,13 +172,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!id) return;
     fetchJson('/lessons/' + id + '/mark_attendance', { method: 'PATCH', body: JSON.stringify({}) })
       .then(function(json){
-        console.debug('mark_attendance response', json);
         if (json && json.ok && json.lesson) updateLessonCell(id, json.lesson);
       })
       .catch(function(err){ console.error('attendance update failed', err); alert('更新に失敗しました'); });
   });
 
-  // 欠席表示パネル開閉（学生）
+  // 欠席パネル開閉（学生）
   document.addEventListener('click', function(e) {
     var ab = e.target.closest('.absent-btn');
     if (!ab) return;
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // 欠席キャンセル（学生/管理者共通）
+  // 欠席キャンセル（共通）
   document.addEventListener('click', function(e) {
     var c = e.target.closest('.absence-cancel');
     if (!c) return;
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // 欠席確定（学生） — 理由必須
+  // 欠席確定（学生）
   document.addEventListener('click', function(e) {
     var conf = e.target.closest('.absence-confirm');
     if (!conf) return;
@@ -218,17 +218,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     fetchJson('/lessons/' + id + '/mark_absence', { method: 'PATCH', body: JSON.stringify({ reason: reason }) })
       .then(function(json){
-        console.debug('mark_absence response', json);
-        if (json && json.ok && json.lesson) {
-          updateLessonCell(id, json.lesson);
-        } else {
-          alert('更新に失敗しました');
-        }
+        if (json && json.ok && json.lesson) updateLessonCell(id, json.lesson);
+        else alert('更新に失敗しました');
       })
       .catch(function(err){ console.error('absence update failed', err); alert('更新に失敗しました'); });
   });
 
-  // 管理者：編集ボタン開閉（textarea に既存理由を入れる）
+  // 管理者: 編集ボタン（開閉・textareaに既存理由を入れる）
   document.addEventListener('click', function(e) {
     var eb = e.target.closest('.edit-btn');
     if (!eb) return;
@@ -243,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
   });
 
-  // 管理者：編集パネルから状態を設定（出席/欠席/無効）
+  // 管理者: 編集パネルから状態を設定
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('.admin-set-btn');
     if (!btn) return;
@@ -279,13 +275,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     fetchJson(path, { method: 'PATCH', body: JSON.stringify(body) })
       .then(function(json){
-        console.debug('admin action response', json);
         if (json && json.ok && json.lesson) {
           updateLessonCell(id, json.lesson);
-          if (panel) {
-            panel.classList.remove('open');
-            panel.setAttribute('aria-hidden', 'true');
-          }
+          if (panel) { panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
         } else {
           alert('更新に失敗しました');
         }
@@ -298,14 +290,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // DOM 更新 helper
   function updateLessonCell(id, lesson) {
-    console.debug('updateLessonCell', id, lesson);
     try {
-      // まず class + data 属性で検索、見つからなければ属性のみで検索、さらに id 数値でも検索
-      var selector1 = '.lesson_cell[data-lesson-id="' + id + '"]';
-      var selector2 = '[data-lesson-id="' + id + '"]';
-      var cell = document.querySelector(selector1) || document.querySelector(selector2);
-
-      // フォールバック：数値としても試す（場合によっては属性が数値で格納されていることがある）
+      var selector = '.lesson_cell[data-lesson-id="' + id + '"]';
+      var cell = document.querySelector(selector) || document.querySelector('[data-lesson-id="' + id + '"]');
       if (!cell) {
         var numId = Number(id);
         if (!Number.isNaN(numId)) {
@@ -314,11 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
       }
-
-      if (!cell) {
-        console.warn('updateLessonCell: cell not found for id', id);
-        return;
-      }
+      if (!cell) { console.warn('updateLessonCell: cell not found for id', id); return; }
 
       var reason = lesson.absence_reason || '';
       cell.dataset.absenceReason = reason;

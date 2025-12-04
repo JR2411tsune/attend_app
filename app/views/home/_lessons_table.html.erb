@@ -42,8 +42,20 @@
                   </div>
 
                   <% if current_user.admin? %>
-                    <div class="attendance-controls">
+                    <!-- admin: セル中央に表示するため edit-center クラスを付与 -->
+                    <div class="attendance-controls edit-center" aria-hidden="false">
                       <button type="button" class="edit-btn" aria-label="編集" data-lesson-id="<%= lesson.id %>">編集</button>
+                    </div>
+
+                    <!-- 管理者のみ admin-edit-panel をレンダ -->
+                    <div class="admin-edit-panel" aria-hidden="true">
+                      <textarea class="absence-reason" placeholder="欠席理由（欠席選択時のみ）"><%= lesson.absence_reason if lesson.absence_reason.present? %></textarea>
+                      <div class="absence-actions">
+                        <button type="button" class="admin-set-btn" data-action="present" data-lesson-id="<%= lesson.id %>">出席にする</button>
+                        <button type="button" class="admin-set-btn" data-action="absent" data-lesson-id="<%= lesson.id %>">欠席にする</button>
+                        <button type="button" class="admin-set-btn" data-action="none" data-lesson-id="<%= lesson.id %>">無効にする</button>
+                        <button type="button" class="absence-cancel">閉じる</button>
+                      </div>
                     </div>
                   <% else %>
                     <div class="attendance-controls">
@@ -59,16 +71,6 @@
                       </div>
                     </div>
                   <% end %>
-
-                  <div class="admin-edit-panel" aria-hidden="true">
-                    <textarea class="absence-reason" placeholder="欠席理由（欠席選択時のみ）"><%= lesson.absence_reason if lesson.absence_reason.present? %></textarea>
-                    <div class="absence-actions">
-                      <button type="button" class="admin-set-btn" data-action="present" data-lesson-id="<%= lesson.id %>">出席にする</button>
-                      <button type="button" class="admin-set-btn" data-action="absent" data-lesson-id="<%= lesson.id %>">欠席にする</button>
-                      <button type="button" class="admin-set-btn" data-action="none" data-lesson-id="<%= lesson.id %>">無効にする</button>
-                      <button type="button" class="absence-cancel">閉じる</button>
-                    </div>
-                  </div>
                 </div>
               <% end %>
             </td>
