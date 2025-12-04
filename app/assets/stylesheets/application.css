@@ -8,3 +8,741 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.notice {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 3rem;
+  width: 90%;
+  background: linear-gradient(to bottom, #cae5cd, #3eb370);
+  border: 2px solid #2a854f;
+  color: #000;
+  font-weight: 500;
+  margin: auto 20px;
+  padding-left: 1rem;
+  border-radius: 5px;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 3rem;
+  width: 90%;
+  background: linear-gradient(to bottom, #ffd5d5, #ff2b2b);
+  border: 2px solid #d50000;
+  color: #000;
+  font-weight: 500;
+  margin: auto 20px;
+  padding-left: 1rem;
+  border-radius: 5px;
+}
+
+/* header */
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  margin: 0px auto 30px auto;
+  background: #0b5ed7;
+  color: #fff;
+  position: relative;
+}
+.title-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* hamburger */
+.hamburger-menu {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 34px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: inherit;
+}
+.hamburger-menu:focus { outline: 2px solid #fff; border-radius: 4px; }
+.hamburger-menu .line {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: #fff;
+  border-radius: 2px;
+}
+
+/* sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  opacity: 0;
+  pointer-events: none;
+  transition: background 0.2s ease, opacity 0.2s ease;
+  z-index: 900;
+}
+.sidebar-overlay.visible {
+  background: rgba(0,0,0,0.35);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* sidebar (enhanced) */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;                 /* 左端に固定しておく */
+  width: 320px;
+  height: 100%;
+  box-sizing: border-box;
+  background: #f7f7f7;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  transform: translateX(-100%);  /* 初期状態は見えない位置へ完全オフスクリーン */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  z-index: 1000;
+  padding: 12px;
+  padding-left: 30px;
+  box-shadow: none;        /* 開いているときのみ影をつける */
+  will-change: transform;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.sidebar.open {
+  transform: translateX(0);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+}
+
+/* sidebar header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sidebar-close {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 6px;
+  cursor: pointer;
+}
+.sidebar-close:focus { outline: 2px solid #0b5ed7; border-radius: 4px; }
+
+.current_user_container .current_user_status {
+  font-size: 0.95rem;
+}
+
+.current_user_container .current_user_name {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* sidebar separator */
+.sidebar-separator {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  margin: 8px 0 12px 0;
+}
+/* students list */
+.students-list ul { list-style: none; padding: 0; margin: 0; }
+.students-list li { margin-bottom: 6px; }
+.student-link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #222;
+}
+.student-link:hover { background: #eef6ff; }
+.student_no { font-weight: 600; width: 5rem; }
+.student_name { color: #333; }
+
+/* responsive: hide sidebar on wide screens and show inline if desired */
+@media (min-width: 1024px) {
+  .sidebar {
+    /* 広い画面でもオーバーレイ型にしてデフォルトは閉じた状態にする */
+    transform: translateX(-100%);
+    left: 0;
+    position: fixed;
+    width: 320px;
+    height: 100%;
+    box-shadow: none;
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+  }
+
+  /* overlay は常に DOM にあるが visible クラスで表示制御する（既存の JS と整合） */
+  .sidebar-overlay { /* 既定の定義を使用するため特に変更不要 */ }
+
+  /* hamburger は常に表示（クリックで sidebar を開閉） */
+  .hamburger-menu { display: inline-flex; }
+
+  /* ページ全体の左余白を消して中央揃え等が崩れないようにする */
+  body { margin-left: 0; }
+}
+
+.lesson_cell { 
+  position: relative; 
+  padding: 6px; 
+  vertical-align: top; 
+  overflow: visible; 
+}
+
+.lesson-inner { 
+  position: relative; 
+  height:100%; 
+}
+
+.attendance-controls { 
+  display: none; 
+  position: absolute; 
+  top: 6px; 
+  right: 6px; 
+  gap:6px; 
+}
+
+.lesson_cell:hover .attendance-controls { 
+  display: flex; 
+}
+
+.attendance-controls button { 
+  padding: 4px 8px; 
+  font-size: 0.9rem; 
+  cursor: pointer; 
+}
+
+.absence-panel { 
+  display: none; 
+  position: absolute; 
+  right: 6px; 
+  bottom: 6px; 
+  width: 220px; 
+  background:#fff; 
+  border: 1px solid #ddd; 
+  padding: 8px; 
+  border-radius: 6px; 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08); 
+  transform-origin: right bottom; 
+  transition: transform .15s ease, opacity .15s ease; 
+  opacity: 0; 
+  transform: scale(.9); 
+  z-index: 20; 
+}
+
+.absence-panel.open { 
+  display: block; 
+  opacity: 1; 
+  transform: scale(1.0); 
+}
+
+.absence-reason { 
+  width: 100%; 
+  box-sizing: border-box; 
+  margin-bottom:6px; 
+}
+
+.absence-actions { 
+  display: flex; 
+  gap:8px; 
+  justify-content: flex-end; 
+}
+
+.att-present { 
+  color: green; 
+  font-weight: 700; 
+}
+
+.att-absent { 
+  color: red; 
+  font-weight:700; 
+  transform: scale(1); 
+  transition: transform .12s ease; 
+}
+
+.attendance-controls { 
+  display: none; 
+  position: absolute; 
+  top: 6px; 
+  right: 6px; 
+  gap:6px; 
+}
+
+/* admin 用: セル全体を覆って中央にボタンを配置 */
+.attendance-controls.edit-center {
+  /* セル全体を覆うがデフォルトは非表示にして hover 時に表示する */
+  position: absolute;
+  inset: 0; /* top:0; right:0; bottom:0; left:0; */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 24;
+  background: transparent;
+}
+
+/* edit-center はセル hover 時に表示 */
+.lesson_cell:hover .attendance-controls.edit-center {
+  display: flex;
+}
+
+/* edit-btn の絶対配置は残しても良いが、edit-center の場合は相対的に中央に配置される */
+.edit-btn {
+  position: relative; /* 親コンテナ内で中央寄せするので relative に変更して安定表示 */
+  left: auto;
+  top: auto;
+  transform: none;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  z-index: 25;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b5ed7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+
+  /* テキストは横書き（明示） */
+  writing-mode: horizontal-tb;
+  white-space: nowrap;
+}
+
+/* ---------- UI 改善: edit / present / absent / panels ---------- */
+
+/* edit ボタンを押しやすく大きく */
+.edit-btn {
+  font-size: 1.05rem;           /* 少し大きめの文字 */
+  padding: 10px 14px;           /* 押しやすいサイズ */
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6 0%, #0b5ed7 100%);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(11,94,215,0.18), inset 0 -2px 0 rgba(255,255,255,0.06);
+  border: 0;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+.edit-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 18px rgba(11,94,215,0.22); }
+.edit-btn:active { transform: translateY(0) scale(0.99); }
+.edit-btn:focus { outline: 3px solid rgba(11,94,215,0.18); outline-offset: 2px; }
+
+/* present / absent ボタンを視認性よく装飾 */
+.present-btn, .absent-btn {
+  font-size: 0.98rem;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 出席ボタン: 緑のグラデーション */
+.present-btn {
+  background: linear-gradient(135deg, #60d394 0%, #16a34a 100%);
+}
+.present-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(22,163,74,0.18); }
+.present-btn:active { transform: translateY(0) scale(.99); }
+
+/* 欠席ボタン: 赤のグラデーション */
+.absent-btn {
+  background: linear-gradient(135deg, #ffb4b4 0%, #ef4444 100%);
+}
+.absent-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(239,68,68,0.18); }
+.absent-btn:active { transform: translateY(0) scale(.99); }
+
+/* absence-panel のデザイン改善 */
+.absence-panel {
+  width: 260px; /* 少し広げる */
+  padding: 12px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+  border: 1px solid rgba(20,20,20,0.06);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+  transition: transform .12s ease, opacity .12s ease;
+}
+
+/* テキストエリア改善 */
+.absence-panel .absence-reason,
+.admin-edit-panel .absence-reason {
+  min-height: 64px;
+  max-height: 160px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.08);
+  resize: vertical;
+  font-size: 0.95rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* absence-panel のアクションボタン */
+.absence-actions button,
+.admin-edit-panel .absence-actions button {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 0;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+/* 確定ボタン（目立たせる） */
+.absence-confirm,
+.admin-edit-panel .admin-set-btn[data-action="absent"] {
+  background: linear-gradient(135deg, #ff8a65 0%, #ef4444 100%);
+  color: #fff;
+  box-shadow: 0 6px 12px rgba(239,68,68,0.12);
+}
+.absence-confirm:hover,
+.admin-edit-panel .admin-set-btn[data-action="absent"]:hover { transform: translateY(-2px); }
+
+/* 出席にするボタン（管理者） */
+.admin-edit-panel .admin-set-btn[data-action="present"] {
+  background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
+  color: #06331d;
+  box-shadow: 0 6px 12px rgba(16,185,129,0.10);
+}
+.admin-edit-panel .admin-set-btn[data-action="present"]:hover { transform: translateY(-2px); }
+
+/* 無効にするボタン（管理者） */
+.admin-edit-panel .admin-set-btn[data-action="none"] {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  color: #1f2937;
+  box-shadow: 0 4px 10px rgba(30,41,59,0.06);
+}
+.admin-edit-panel .admin-set-btn[data-action="none"]:hover { transform: translateY(-2px); }
+
+/* 閉じる/キャンセル */
+.absence-cancel {
+  background: transparent;
+  color: #374151;
+  border: 1px solid rgba(55,65,81,0.06);
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+.absence-cancel:hover { background: rgba(0,0,0,0.03); }
+
+/* admin-edit-panel: デフォルトは非表示、.open で表示 */
+.admin-edit-panel {
+  display: none;
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 280px;
+  padding: 10px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border: 1px solid rgba(10,24,48,0.06);
+  box-shadow: 0 14px 38px rgba(4,8,20,0.06);
+  transform-origin: right bottom;
+  transition: transform .12s ease, opacity .12s ease;
+  opacity: 0;
+  transform: scale(.96);
+  z-index: 30;
+}
+
+.admin-edit-panel.open {
+  display: block;
+  opacity: 1;
+  transform: scale(1.0);
+}
+
+/* 点击／キャンセル時に aria-hidden も併用するための補助（任意） */
+.admin-edit-panel[aria-hidden="true"] { pointer-events: none; }
+.admin-edit-panel[aria-hidden="false"] { pointer-events: auto; }
+
+/* ボタン間の余白調整 */
+.absence-actions { gap: 10px; display: flex; justify-content: flex-end; align-items: center; }
+
+/* キーボード操作性 */
+.edit-btn:focus, .present-btn:focus, .absent-btn:focus, .absence-confirm:focus, .absence-cancel:focus, .admin-edit-panel .admin-set-btn:focus {
+  box-shadow: 0 0 0 4px rgba(11,94,215,0.12);
+  outline: none;
+}
+
+/* small screen 調整 */
+@media (max-width: 520px) {
+  .absence-panel, .admin-edit-panel { width: calc(100% - 24px); left: 12px; right: 12px; bottom: 12px; }
+  .edit-btn { font-size: 1rem; padding: 8px 10px; }
+}
+
+/* Layout: header / main */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  margin: 0 auto 20px;
+  background: linear-gradient(90deg,#0b5ed7 0%, #0a58ca 100%);
+  color: #fff;
+  border-radius: 8px;
+  max-width: 1200px;
+}
+.header-left { display:flex; align-items:center; gap:12px; }
+.header-right { display:flex; align-items:center; gap:12px; }
+
+/* ログアウトボタン（右端） */
+.logout-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:8px;
+  background: linear-gradient(135deg,#ffffff22, #ffffff11);
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.12);
+  font-weight:600;
+  text-decoration:none;
+  cursor:pointer;
+}
+.logout-btn:hover { background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+
+/* Page main wrapper */
+.page-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+/* Table: cleaner, modern look */
+#lessons_table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(8,15,40,0.06);
+  table-layout: fixed;
+}
+
+/* Header cells */
+#lessons_table thead th {
+  background: linear-gradient(180deg,#f3f6fb,#eef4ff);
+  color: #0b3a66;
+  font-weight:700;
+  padding: 12px;
+  text-align:center;
+  border-bottom: 1px solid rgba(11,62,107,0.06);
+}
+
+/* First column style */
+#lessons_table th.first_column {
+  background: linear-gradient(180deg,#f8fafc,#f1f5f9);
+  color:#0b3a66;
+  text-align:left;
+  padding-left:18px;
+  width:160px;
+}
+
+/* Cells */
+#lessons_table td {
+  background: #fff;
+  padding: 8px;
+  vertical-align: top;
+  border-right: 1px solid rgba(15,23,42,0.04);
+  border-bottom: 1px solid rgba(15,23,42,0.04);
+  min-width: 90px;
+  height: 120px;
+}
+
+/* zebra-ish rows */
+#lessons_table tbody tr:nth-child(even) td { background: linear-gradient(180deg,#ffffff,#fbfdff); }
+
+/* lesson-inner improvements */
+.lesson-inner { display:flex; flex-direction:column; justify-content:space-between; height:100%; padding:6px; box-sizing:border-box; }
+
+/* subject */
+.lesson-subject { display:block; font-weight:600; color:#0b3a66; margin-bottom:6px; }
+
+/* attendance marker */
+.lesson-attendance { font-size:1.25rem; font-weight:700; display:inline-block; padding:4px 8px; border-radius:6px; }
+.att-present { background: linear-gradient(90deg,#bbf7d0,#34d399); color:#064e3b; padding:4px 8px; border-radius:6px; }
+.att-absent  { background: linear-gradient(90deg,#ffd6d6,#fb7185); color:#7f1d1d; padding:4px 8px; border-radius:6px; }
+.att-none    { color:#64748b; background: #f1f5f9; padding:4px 8px; border-radius:6px; }
+
+/* hover highlight for cell */
+#lessons_table td.lesson_cell:hover { box-shadow: inset 0 0 0 2px rgba(11,94,215,0.06); transform: translateY(-1px); transition: transform .12s ease; }
+
+/* Center edit button container remains but ensure pointer events only when visible */
+.attendance-controls.edit-center { pointer-events: none; }
+.lesson_cell:hover .attendance-controls.edit-center { pointer-events: auto; }
+
+/* Buttons: consistent sizes and gradients */
+.edit-btn, .present-btn, .absent-btn, .admin-set-btn, .absence-confirm, .absence-cancel {
+  font-weight:600;
+  border:0;
+  border-radius:10px;
+  padding:10px 14px;
+  box-sizing:border-box;
+}
+
+/* tweak specific button colors (kept existing gradients) */
+.edit-btn { background: linear-gradient(135deg,#3b82f6,#0b5ed7); color:#fff; }
+.present-btn { background: linear-gradient(135deg,#5eead4,#10b981); color:#06331d; }
+.absent-btn { background: linear-gradient(135deg,#ffb4b4,#ef4444); color:#fff; }
+
+/* Panel improvements */
+.absence-panel, .admin-edit-panel {
+  border-radius:8px;
+  padding:12px;
+  box-shadow: 0 16px 40px rgba(6,12,34,0.08);
+  border: 1px solid rgba(10,24,48,0.06);
+}
+
+/* Responsive: make table horizontally scroll on small screens */
+@media (max-width: 900px) {
+  .page-main { padding: 8px; }
+  #lessons_table th, #lessons_table td { min-width: 9rem; }
+  .app-header { padding:10px; border-radius:6px; }
+}
+
+/* ---------- Sidebar をヘッダーに合わせたスタイルに変更 ---------- */
+.sidebar {
+  background: linear-gradient(90deg, #0b5ed7 0%, #0a58ca 100%);
+  color: #fff;
+  border-right: none;
+  box-shadow: 2px 0 12px rgba(4,8,20,0.12);
+  padding: 18px 20px;
+}
+
+/* sidebar header をヘッダー風に */
+.sidebar .sidebar-header {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* current user 表示を強調 */
+.current_user_container .current_user_name,
+.current_user_container .current_user_status {
+  color: #fff;
+}
+.current_user_container .current_user_name { font-weight:700; font-size:1.05rem; }
+.current_user_container .current_user_status { opacity: 0.95; font-size:0.95rem; }
+
+/* close ボタンを目立たせる（白系で） */
+.sidebar-close {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 8px;
+  border: none;
+  font-weight:700;
+}
+.sidebar-close:hover { background: rgba(255,255,255,0.14); }
+
+/* 生徒リストをカード風に */
+.students-list ul { margin: 8px 0 0 0; }
+.student-link {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  transition: background .12s ease, transform .08s ease;
+}
+.student-link:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-2px);
+}
+.student_no, .student_name { color: #fff; }
+.student_no { font-weight:700; opacity:0.95; }
+
+/* sidebar のオーバーレイを少し暗くしてコントラスト向上 */
+.sidebar-overlay.visible { background: rgba(0,0,0,0.46); }
+
+/* スマホなど狭い画面での調整 */
+@media (max-width: 768px) {
+  .sidebar { width: 90%; padding-left: 16px; padding-right: 16px; }
+  .student-link { padding: 12px; }
+}
+
+/* ---------- 週切替ボタンのデザイン改善 ---------- */
+.week-nav {
+  appearance: none;
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 6px;
+  margin-right: 6px;
+  box-shadow: 0 8px 18px rgba(6,12,34,0.08);
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+/* 前週 */
+.week-nav.prev-week {
+  background: linear-gradient(135deg, #e6f0ff 0%, #cfe1ff 100%);
+  color: #0b3a66;
+  border: 1px solid rgba(11,62,107,0.06);
+}
+.week-nav.prev-week:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(11,62,107,0.08); }
+
+/* 次週 */
+.week-nav.next-week {
+  background: linear-gradient(135deg, #dfffe9 0%, #bff5d4 100%);
+  color: #064e3b;
+  border: 1px solid rgba(6,78,59,0.06);
+}
+.week-nav.next-week:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(6,78,59,0.08); }
+
+/* 小さなアイコン風にしたい場合 */
+.week-nav::before {
+  content: "";
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.35);
+  opacity: 0.9;
+}
+.week-nav.prev-week::before { transform: rotate(180deg); }
+
+/* 右側の nav に合わせてボタン群を中央寄せ */
+.lessons-nav { display:flex; align-items:center; gap:6px; }
+
+/* responsive: smaller buttons on narrow screens */
+@media (max-width: 520px) {
+  .week-nav { padding: 8px 10px; font-size: 0.95rem; border-radius: 8px; }
+}
+
+/* keep earlier focused states */
+.edit-btn:focus, .present-btn:focus, .absent-btn:focus, .logout-btn:focus {
+  outline: 3px solid rgba(11,94,215,0.12);
+  outline-offset: 2px;
+}
+
+

@@ -1,2 +1,11 @@
-<h1>Home#index</h1>
-<p>Find me in app/views/home/index.html.erb</p>
+<%= stylesheet_link_tag "home", media: "all" %>
+
+<% if notice %>
+  <p class="notice"><%= notice %></p>
+<% end %>
+<% if flash[:alert] %>
+  <p class="alert"><%= alert %></p>
+<% end %>
+<p class="welcome_message">こんにちは、<%= current_user.name %>さん</p>
+
+<%= render partial: "home/lessons_container", locals: { lessons: @lessons, student: @display_student } %>

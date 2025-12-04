@@ -23,6 +23,311 @@
   </head>
 
   <body>
-    <%= yield %>
+    <header class="app-header">
+      <div class="header-left">
+        <button class="hamburger-menu" aria-label="メニューを開く" aria-expanded="false" type="button">
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="line"></span>
+        </button>
+        <p class="title-text">出欠席管理アプリ</p>
+      </div>
+      <div class="header-right">
+        <% if logged_in? %>
+          <%= button_to "ログアウト", logout_path, method: :delete, class: "logout-btn" %>
+        <% end %>
+      </div>
+    </header>
+
+    <%= render 'layouts/sidebar' %>
+    <main class="page-main">
+      <%= yield %>
+    </main>
   </body>
+
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.querySelector('.hamburger-menu');
+  var sidebar = document.querySelector('.sidebar');
+  var closeBtn = document.querySelector('.sidebar-close');
+  var overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  document.body.appendChild(overlay);
+
+  function openSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  }
+  function closeSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  if (btn && sidebar) {
+    btn.addEventListener('click', function() {
+      if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+    });
+  }
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  function csrfToken() {
+    var m = document.querySelector('meta[name="csrf-token"]');
+    return m ? m.getAttribute('content') : '';
+  }
+
+  function fetchJson(path, options) {
+    options = options || {};
+    options.credentials = options.credentials || 'same-origin';
+    options.headers = Object.assign({
+      'X-CSRF-Token': csrfToken(),
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }, options.headers || {});
+    return fetch(path, options).then(function(res) {
+      console.debug('fetchJson', path, res.status);
+      if (!res.ok) {
+        return res.text().then(function(txt) {
+          var parsed = null;
+          try { parsed = JSON.parse(txt); } catch(e){ parsed = { ok: false, error_text: txt }; }
+          var err = new Error('HTTP ' + res.status);
+          err.response = parsed;
+          throw err;
+        });
+      }
+      return res.json();
+    });
+  }
+
+  function fetchHtml(path) {
+    return fetch(path, { credentials: 'same-origin', headers: { 'Accept': 'text/html' } })
+      .then(function(res){ if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); });
+  }
+
+  // 学生リンクの非同期読み込み（サイドバー内）
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('.student-link');
+    if (!link) return;
+    e.preventDefault();
+    var url = link.dataset.url;
+    if (!url) return;
+    fetchHtml(url)
+      .then(function(html){
+        var lessonsContainer = document.querySelector('.lessons_container');
+        var target = lessonsContainer || document.getElementById('timetable-container');
+        if (lessonsContainer) {
+          lessonsContainer.outerHTML = html;
+        } else if (target) {
+          target.innerHTML = html;
+        }
+        closeSidebar();
+      })
+      .catch(function(err){ console.error('failed to load timetable', err); alert('時間割の読み込みに失敗しました'); });
+  });
+
+  // 週切替ナビ
+  document.addEventListener('click', function(e) {
+    var wbtn = e.target.closest('.week-nav');
+    if (!wbtn) return;
+    e.preventDefault();
+    var wrapper = document.getElementById('lessons_wrapper') || document.querySelector('.lessons_container > div');
+    if (!wrapper) return;
+    var start = wrapper.dataset.start;
+    var studentId = wrapper.dataset.studentId || '';
+    var dir = parseInt(wbtn.dataset.direction, 10) || 0;
+
+    var d = new Date(start);
+    d.setDate(d.getDate() + dir * 7);
+    var yyyy = d.getFullYear();
+    var mm = ('0' + (d.getMonth()+1)).slice(-2);
+    var dd = ('0' + d.getDate()).slice(-2);
+    var newStart = yyyy + '-' + mm + '-' + dd;
+
+    var url = '/home/week?start=' + encodeURIComponent(newStart);
+    if (studentId) url += '&student_id=' + encodeURIComponent(studentId);
+
+    fetchHtml(url)
+      .then(function(html){
+        var lessonsContainer = document.querySelector('.lessons_container');
+        var target = lessonsContainer || document.getElementById('timetable-container');
+        if (lessonsContainer) {
+          lessonsContainer.outerHTML = html;
+        } else if (target) {
+          target.innerHTML = html;
+        }
+      })
+      .catch(function(err){ console.error('failed to load week', err); alert('週切替に失敗しました'); });
+  });
+
+  // 出席（学生）
+  document.addEventListener('click', function(e) {
+    var p = e.target.closest('.present-btn');
+    if (!p) return;
+    e.preventDefault();
+    var id = p.dataset.lessonId;
+    if (!id) return;
+    fetchJson('/lessons/' + id + '/mark_attendance', { method: 'PATCH', body: JSON.stringify({}) })
+      .then(function(json){
+        if (json && json.ok && json.lesson) updateLessonCell(id, json.lesson);
+      })
+      .catch(function(err){ console.error('attendance update failed', err); alert('更新に失敗しました'); });
+  });
+
+  // 欠席パネル開閉（学生）
+  document.addEventListener('click', function(e) {
+    var ab = e.target.closest('.absent-btn');
+    if (!ab) return;
+    e.preventDefault();
+    var cell = ab.closest('.lesson_cell');
+    if (!cell) return;
+    var panel = cell.querySelector('.absence-panel');
+    if (panel) {
+      var now = panel.classList.toggle('open');
+      panel.setAttribute('aria-hidden', now ? 'false' : 'true');
+      var ta = panel.querySelector('.absence-reason');
+      if (ta) ta.value = cell.dataset.absenceReason || ta.value || '';
+    }
+  });
+
+  // 欠席キャンセル（共通）
+  document.addEventListener('click', function(e) {
+    var c = e.target.closest('.absence-cancel');
+    if (!c) return;
+    e.preventDefault();
+    var panel = c.closest('.absence-panel') || c.closest('.admin-edit-panel');
+    if (panel) {
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // 欠席確定（学生）
+  document.addEventListener('click', function(e) {
+    var conf = e.target.closest('.absence-confirm');
+    if (!conf) return;
+    e.preventDefault();
+    var id = conf.dataset.lessonId;
+    var panel = conf.closest('.absence-panel');
+    if (!id || !panel) return;
+    var reason = (panel.querySelector('.absence-reason').value || '').trim();
+    if (!reason) { alert('欠席理由を入力してください。'); return; }
+
+    fetchJson('/lessons/' + id + '/mark_absence', { method: 'PATCH', body: JSON.stringify({ reason: reason }) })
+      .then(function(json){
+        if (json && json.ok && json.lesson) updateLessonCell(id, json.lesson);
+        else alert('更新に失敗しました');
+      })
+      .catch(function(err){ console.error('absence update failed', err); alert('更新に失敗しました'); });
+  });
+
+  // 管理者: 編集ボタン（開閉・textareaに既存理由を入れる）
+  document.addEventListener('click', function(e) {
+    var eb = e.target.closest('.edit-btn');
+    if (!eb) return;
+    e.preventDefault();
+    var cell = eb.closest('.lesson_cell');
+    if (!cell) return;
+    var panel = cell.querySelector('.admin-edit-panel');
+    if (!panel) return;
+    var ta = panel.querySelector('.absence-reason');
+    if (ta) ta.value = cell.dataset.absenceReason || ta.value || '';
+    var isOpen = panel.classList.toggle('open');
+    panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  });
+
+  // 管理者: 編集パネルから状態を設定
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.admin-set-btn');
+    if (!btn) return;
+    e.preventDefault();
+
+    var action = btn.dataset.action;
+    var id = btn.dataset.lessonId;
+    if (!id) { console.warn('no lesson id on admin-set-btn'); return; }
+
+    var panel = btn.closest('.admin-edit-panel');
+    var reason = panel ? (panel.querySelector('.absence-reason') || {}).value.trim() : '';
+
+    if (action === 'absent' && !reason) {
+      alert('欠席理由を入力してください。');
+      return;
+    }
+
+    var path;
+    var body = {};
+    if (action === 'present') {
+      path = '/lessons/' + id + '/mark_attendance';
+      body = {};
+    } else if (action === 'absent') {
+      path = '/lessons/' + id + '/mark_absence';
+      body = { reason: reason };
+    } else if (action === 'none') {
+      path = '/lessons/' + id + '/mark_none';
+      body = {};
+    } else {
+      console.warn('unknown admin action', action);
+      return;
+    }
+
+    fetchJson(path, { method: 'PATCH', body: JSON.stringify(body) })
+      .then(function(json){
+        if (json && json.ok && json.lesson) {
+          updateLessonCell(id, json.lesson);
+          if (panel) { panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
+        } else {
+          alert('更新に失敗しました');
+        }
+      })
+      .catch(function(err){
+        console.error('admin-set-btn fetch error', err);
+        alert('通信エラーが発生しました');
+      });
+  });
+
+  // DOM 更新 helper
+  function updateLessonCell(id, lesson) {
+    try {
+      var selector = '.lesson_cell[data-lesson-id="' + id + '"]';
+      var cell = document.querySelector(selector) || document.querySelector('[data-lesson-id="' + id + '"]');
+      if (!cell) {
+        var numId = Number(id);
+        if (!Number.isNaN(numId)) {
+          cell = Array.from(document.querySelectorAll('[data-lesson-id]')).find(function(el){
+            return Number(el.getAttribute('data-lesson-id')) === numId;
+          });
+        }
+      }
+      if (!cell) { console.warn('updateLessonCell: cell not found for id', id); return; }
+
+      var reason = lesson.absence_reason || '';
+      cell.dataset.absenceReason = reason;
+
+      var attWrap = cell.querySelector('.lesson-attendance');
+      if (attWrap) {
+        if (lesson.is_attendance === 1 || lesson.is_attendance == '1') {
+          attWrap.innerHTML = '<span class="att-present">〇</span>';
+        } else if (lesson.is_attendance === 2 || lesson.is_attendance == '2') {
+          attWrap.innerHTML = '<span class="att-absent">×</span>';
+        } else {
+          attWrap.innerHTML = '<span class="att-none">-</span>';
+        }
+      }
+
+      var adminTa = cell.querySelector('.admin-edit-panel .absence-reason');
+      if (adminTa) adminTa.value = reason;
+      var studentTa = cell.querySelector('.absence-panel .absence-reason');
+      if (studentTa) studentTa.value = reason;
+
+      var openPanels = cell.querySelectorAll('.admin-edit-panel.open, .absence-panel.open');
+      openPanels.forEach(function(p){ p.classList.remove('open'); p.setAttribute('aria-hidden','true'); });
+    } catch (err) {
+      console.error('updateLessonCell error', err);
+    }
+  }
+});
+</script>
 </html>

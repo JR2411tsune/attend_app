@@ -1,0 +1,83 @@
+<div id="lessons_wrapper" data-start="<%= @week_days.first %>" data-student-id="<%= defined?(student) && student ? student.id : '' %>">
+  <table id="lessons_table">
+    <thead>
+      <tr>
+        <th class="first_column"></th>
+        <% @week_days.each do |day| %>
+          <th>
+            <%= day.strftime("%m/%d") %><br>
+            (<%= @days[day.wday] %>)
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% 4.times do |period| %>
+        <tr>
+          <th class="first_column period_column"><%= period + 1 %>コマ</th>
+
+          <% @week_days.each do |day| %>
+            <% lesson = (defined?(lessons) ? lessons : @lessons).detect { |l| l.date == day && l.period_number == (period + 1) } %>
+            <% data_attrs = {} %>
+            <% if lesson %>
+              <% data_attrs['data-lesson-id'] = lesson.id %>
+              <% data_attrs['data-absence-reason'] = h(lesson.absence_reason) if lesson.absence_reason.present? %>
+            <% end %>
+
+            <td class="lesson_cell" <%= data_attrs.map { |k,v| "#{k}=\"#{v}\"" }.join(' ').html_safe %>>
+              <% if lesson %>
+                <div class="lesson-inner">
+                  <div class="lesson-main">
+                    <span class="lesson-subject"><%= lesson.subject %></span>
+                    <span class="lesson-attendance">
+                      <% if lesson.is_attendance == 1 %>
+                        <span class="att-present">〇</span>
+                      <% elsif lesson.is_attendance == 2 %>
+                        <span class="att-absent">×</span>
+                      <% else %>
+                        <span class="att-none">-</span>
+                      <% end %>
+                    </span>
+                  </div>
+
+                  <% if current_user.admin? %>
+                    <!-- admin: セル中央に表示するため edit-center クラスを付与 -->
+                    <div class="attendance-controls edit-center" aria-hidden="false">
+                      <button type="button" class="edit-btn" aria-label="編集" data-lesson-id="<%= lesson.id %>">編集</button>
+                    </div>
+
+                    <!-- 管理者のみ admin-edit-panel をレンダ -->
+                    <div class="admin-edit-panel" aria-hidden="true">
+                      <textarea class="absence-reason" placeholder="欠席理由（欠席選択時のみ）"><%= lesson.absence_reason if lesson.absence_reason.present? %></textarea>
+                      <div class="absence-actions">
+                        <button type="button" class="admin-set-btn" data-action="present" data-lesson-id="<%= lesson.id %>">出席にする</button>
+                        <button type="button" class="admin-set-btn" data-action="absent" data-lesson-id="<%= lesson.id %>">欠席にする</button>
+                        <button type="button" class="admin-set-btn" data-action="none" data-lesson-id="<%= lesson.id %>">無効にする</button>
+                        <button type="button" class="absence-cancel">閉じる</button>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="attendance-controls">
+                      <button type="button" class="present-btn" data-lesson-id="<%= lesson.id %>">出席</button>
+                      <button type="button" class="absent-btn" data-lesson-id="<%= lesson.id %>">欠席</button>
+
+                      <div class="absence-panel" aria-hidden="true">
+                        <textarea class="absence-reason" placeholder="欠席理由（任意）"><%= lesson.absence_reason if lesson.absence_reason.present? %></textarea>
+                        <div class="absence-actions">
+                          <button type="button" class="absence-confirm" data-lesson-id="<%= lesson.id %>">確定</button>
+                          <button type="button" class="absence-cancel">キャンセル</button>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </td>
+          <% end %>
+
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

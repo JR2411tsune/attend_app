@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  before_action :require_login, only: [:destroy]
   def new
   end
 
@@ -9,6 +10,7 @@ class SessionsController < ApplicationController
       redirect_to home_index_path, notice: "ログインに成功しました。"
     else
       flash.now[:alert] = "学籍番号、またはパスワードが正しくありません。"
+      render :new, status: :unprocessable_entity
     end
   end
 

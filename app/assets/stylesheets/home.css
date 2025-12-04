@@ -1,0 +1,88 @@
+#lessons_table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+#lessons_table {
+  width: 100%;
+  table-layout: fixed; /* 均等列幅にして崩れ防止 */
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+#lessons_table th,
+#lessons_table td {
+  box-sizing: border-box;
+  width: 100px;          /* 基本幅（必要なら media query で調整） */
+  min-width: 80px;
+  height: 100px;
+  padding: 8px;
+  text-align: center;
+  vertical-align: top;   /* 上部基準にする */
+  overflow: visible;     /* tooltip をセル外に表示できるように */
+  word-wrap: break-word;
+}
+
+#lessons_table .first_column {
+  width: 150px;
+  min-width: 120px;
+  font-size: 1.1rem;
+}
+
+/* 小さい画面では横スクロールにして崩れを防ぐ */
+@media (max-width: 768px) {
+  .lessons_container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #lessons_table th, #lessons_table td { width: 9.5rem; min-width: 9.5rem; height: 8.5rem; padding: 6px; }
+}
+
+/* center page elements on homepage */
+.welcome_message,
+.lessons_container,
+.current_student,
+.notice,
+.alert {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* make lesson cells square while keeping first column wider */
+#lessons_table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* first column (header column) wider and not square */
+#lessons_table .first_column {
+  width: 180px;
+  min-width: 140px;
+}
+
+/* make each lesson cell content keep square aspect */
+#lessons_table td.lesson_cell {
+  padding: 6px;
+  vertical-align: top;
+}
+
+/* Use aspect-ratio on inner wrapper so visual content is square */
+#lessons_table td.lesson_cell .lesson-inner {
+  aspect-ratio: 1 / 1;
+  height: auto; /* allow aspect-ratio to control box */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  overflow: visible; /* allow tooltip overflow */
+  padding: 6px;
+}
+
+/* preserve header cells height behaviour */
+#lessons_table th { height: auto; }
+
+/* responsive: reduce fixed sizes on smaller screens */
+@media (max-width: 768px) {
+  #lessons_table th, #lessons_table td { min-width: 9.5rem; }
+  #lessons_table .first_column { width: 140px; }
+}
