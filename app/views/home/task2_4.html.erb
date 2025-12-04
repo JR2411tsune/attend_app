@@ -1,0 +1,64 @@
+<table>
+    <tr>
+        <th>ユーザーID</th>
+        <th>出欠状況</th>
+    </tr>
+    </tr>
+ 
+ 
+<table border="1">
+    <tr>
+        <th>時間</th>
+        <th>内容</th>
+    </tr>
+    <tr>
+        <td>1時間目</td>
+        <td>国語</td>
+<td>
+            <% if @timelimit_h_1 %>
+                <%if @timelimit_m_1 %> 
+                    <%= button_to "出席", home_add_attendance_path(status: "present", period: 1), method: :post, class: "btn btn-success" %>
+                    <%= button_to "欠席", home_add_attendance_path(status: "absent", period: 1), method: :post, class: "btn btn-danger" %>
+                <% end %>
+            <% end %>
+        </td>
+    </tr>
+    <tr>
+        <td>2時間目</td>
+        <td>数学</td>
+<td>
+            <% if @timelimit_h_2 %>
+                <% if @timelimit_m_2 %>
+                    <%= button_to "出席", home_add_attendance_path(status: "present", period: 2), method: :post, class: "btn btn-success" %>
+                    <%= button_to "欠席", home_add_attendance_path(status: "absent", period: 2), method: :post, class: "btn btn-danger" %>
+                <% end %>
+            <% end %>
+        </td>
+    </tr>
+    <tr>
+        <td>3時間目</td>
+        <td>英語</td>
+<td>
+            <% if @timelimit_h_3 %>
+                <% if @timelimit_m_3 %>
+                    <%= button_to "出席", home_add_attendance_path(status: "present", period: 3), method: :post, class: "btn btn-success" %>
+                    <%= button_to "欠席", home_add_attendance_path(status: "absent", period: 3), method: :post, class: "btn btn-danger" %>
+                <% end %>
+            <% end %>
+        </td>
+    </tr>
+</table>
+
+    <tr>
+        <td>総出席数：</td>
+        <td><%= @total_attendance%></td>
+        <td>コマ</td>
+        <td>総欠席数：</td>
+        <td>
+            <span style="color: <%= @total_absence > 5 ? 'red' : @total_absence > 2 ? 'orange' : 'green' %>;">
+                <%= @total_absence %>
+            </span>
+        </td>
+        <td>コマ</td>
+    <tr>
+</table>

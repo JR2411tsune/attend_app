@@ -22,7 +22,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_03_033909) do
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_lessons_on_user_id"
   end
-
+  
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "password_digest"

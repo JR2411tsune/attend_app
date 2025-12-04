@@ -1,0 +1,2 @@
+class Testsumple < ApplicationRecord
+end

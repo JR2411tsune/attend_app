@@ -36,4 +36,5 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  post 'home/add_attendance', to: 'home#add_attendance'
 end
