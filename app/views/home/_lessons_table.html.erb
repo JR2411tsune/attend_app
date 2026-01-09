@@ -24,8 +24,12 @@
               <% data_attrs['data-lesson-id'] = lesson.id %>
               <% data_attrs['data-absence-reason'] = h(lesson.absence_reason) if lesson.absence_reason.present? %>
             <% end %>
+            <%# ensure data-date and data-period present for JS checks %>
+            <% cell_attrs = data_attrs.dup %>
+            <% cell_attrs['data-date'] = day.to_s %>
+            <% cell_attrs['data-period'] = (period + 1).to_s %>
+            <td class="lesson_cell" <%= cell_attrs.map { |k,v| "#{k}=\"#{v}\"" }.join(' ').html_safe %>>
 
-            <td class="lesson_cell" <%= data_attrs.map { |k,v| "#{k}=\"#{v}\"" }.join(' ').html_safe %>>
               <% if lesson %>
                 <div class="lesson-inner">
                   <div class="lesson-main">
@@ -57,6 +61,7 @@
                         <button type="button" class="absence-cancel">閉じる</button>
                       </div>
                     </div>
+                  <!-- 生徒側 -->
                   <% else %>
                     <div class="attendance-controls">
                       <button type="button" class="present-btn" data-lesson-id="<%= lesson.id %>">出席</button>

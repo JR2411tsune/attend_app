@@ -163,10 +163,51 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(function(err){ console.error('failed to load week', err); alert('週切替に失敗しました'); });
   });
 
+  // 時間締め切りに関するメソッド群
+  function parseDateParts(isoDate) {
+    // expecting "YYYY-MM-DD"
+    var parts = (isoDate || '').split('-');
+    if (parts.length !== 3) return null;
+    return { y: parseInt(parts[0],10), m: parseInt(parts[1],10)-1, d: parseInt(parts[2],10) };
+  }
+
+  function deadlineFor(period, isoDate) {
+    var mapping = {
+      1: [9, 30],
+      2: [11, 20],
+      3: [13, 45]
+    };
+    var parts = parseDateParts(isoDate);
+    if (!parts) return null;
+    var hm = mapping[period];
+    if (hm) {
+      return new Date(parts.y, parts.m, parts.d, hm[0], hm[1], 0);
+    } else {
+      // default end of day
+      return new Date(parts.y, parts.m, parts.d, 23, 59, 59);
+    }
+  }
+
+  function isBeforeDeadline(cell) {
+    if (!cell) return false;
+    var date = cell.dataset.date;
+    var period = parseInt(cell.dataset.period, 10) || 0;
+    var dl = deadlineFor(period, date);
+    if (!dl) return true; // fail-safeで許可
+    var now = new Date();
+    return now.getTime() <= dl.getTime();
+  }
+
   // 出席（学生）
   document.addEventListener('click', function(e) {
+    var current_time = new Date();
     var p = e.target.closest('.present-btn');
     if (!p) return;
+    var cell = btn.closest('.lesson_cell');
+    if (!isBeforeDeadline(cell)) {
+      alert('締切を過ぎているため出席を送信できません。');
+      return;
+    }
     e.preventDefault();
     var id = p.dataset.lessonId;
     if (!id) return;
@@ -209,6 +250,11 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e) {
     var conf = e.target.closest('.absence-confirm');
     if (!conf) return;
+    var cell = btn.closest('.lesson_cell');
+    if (!isBeforeDeadline(cell)) {
+      alert('締切を過ぎているため出席を送信できません。');
+      return;
+    }
     e.preventDefault();
     var id = conf.dataset.lessonId;
     var panel = conf.closest('.absence-panel');
