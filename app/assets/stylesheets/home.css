@@ -81,6 +81,10 @@
 /* preserve header cells height behaviour */
 #lessons_table th { height: auto; }
 
+#lessons_table th.period_column {
+  font-size: 1.5rem;
+}
+
 /* responsive: reduce fixed sizes on smaller screens */
 @media (max-width: 768px) {
   #lessons_table th, #lessons_table td { min-width: 9.5rem; }
